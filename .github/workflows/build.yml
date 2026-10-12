@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: true  # ← UBAH: true agar credentials tersimpan
+          persist-credentials: true
 
       - name: Update xbps dan install dependencies
         env:
@@ -48,9 +48,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Pastikan berada di direktori workspace yang benar
+          cd "$GITHUB_WORKSPACE"
+          
+          # Konfigurasi git
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          
+          # Verifikasi bahwa kita berada di git repository
+          if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+            echo "❌ Bukan git repository. Inisialisasi ulang..."
+            git init
+            git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+            git fetch origin
+            git checkout -b main origin/main || git checkout -b main
+          fi
           
           git add -A
           
@@ -60,9 +73,9 @@ jobs:
           else
             git commit -m "Auto: Sign packages and generate index [skip ci]"
             # Push menggunakan token
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main || \
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:master || \
-            echo "⚠️ Push gagal - mungkin branch tidak ada"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main || \
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:master || \
+            echo "️ Push gagal - mungkin branch tidak ada"
           fi
 
       - name: Setup Pages
