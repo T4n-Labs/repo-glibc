@@ -1,0 +1,19 @@
+{"packages": [
+    {
+      "name": "tpkg",
+      "version": "1.0_1",
+      "arch": "armv6l",
+      "filename": "tpkg-1.0_1.armv6l.xbps",
+      "size": 17231,
+      "desc": "Package for armv6l"
+    }
+,
+    {
+      "name": "zvc",
+      "version": "1.0_1",
+      "arch": "armv6l",
+      "filename": "zvc-1.0_1.armv6l.xbps",
+      "size": 7568,
+      "desc": "Package for armv6l"
+    }
+]}

@@ -1,0 +1,19 @@
+{"packages": [
+    {
+      "name": "tpkg",
+      "version": "1.0_1",
+      "arch": "aarch64",
+      "filename": "tpkg-1.0_1.aarch64.xbps",
+      "size": 17233,
+      "desc": "Package for aarch64"
+    }
+,
+    {
+      "name": "zvc",
+      "version": "1.0_1",
+      "arch": "aarch64",
+      "filename": "zvc-1.0_1.aarch64.xbps",
+      "size": 7565,
+      "desc": "Package for aarch64"
+    }
+]}

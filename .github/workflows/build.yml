@@ -1,0 +1,98 @@
+name: Build and Deploy XBPS Repository
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/void-linux/void-glibc-full:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Update xbps dan install dependencies
+        env:
+          XBPS_ALLOW_CHOWN: 1
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -y git bash coreutils
+
+      - name: Sign Packages
+        env:
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          XBPS_ALLOW_CHOWN: 1
+        run: |
+          bash .github/workflows/signature.sh
+
+      - name: Generate Index Files
+        run: |
+          bash .github/workflows/autogen-index.sh
+
+      - name: Generate Packages JSON
+        run: |
+          bash .github/workflows/autogen-json.sh
+
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Pastikan berada di direktori workspace yang benar
+          cd "$GITHUB_WORKSPACE"
+          
+          # Konfigurasi git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          
+          # Verifikasi bahwa kita berada di git repository
+          if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+            echo "❌ Bukan git repository. Inisialisasi ulang..."
+            git init
+            git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+            git fetch origin
+            git checkout -b main origin/main || git checkout -b main
+          fi
+          
+          git add -A
+          
+          # Cek apakah ada perubahan
+          if git diff --staged --quiet; then
+            echo "✓ Tidak ada perubahan yang perlu di-commit"
+          else
+            git commit -m "Auto: Sign packages and generate index [skip ci]"
+            # Push menggunakan token
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main || \
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:master || \
+            echo "️ Push gagal - mungkin branch tidak ada"
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

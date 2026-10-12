@@ -1,0 +1,19 @@
+{"packages": [
+    {
+      "name": "tpkg",
+      "version": "1.0_1",
+      "arch": "i686",
+      "filename": "tpkg-1.0_1.i686.xbps",
+      "size": 17232,
+      "desc": "Package for i686"
+    }
+,
+    {
+      "name": "zvc",
+      "version": "1.0_1",
+      "arch": "i686",
+      "filename": "zvc-1.0_1.i686.xbps",
+      "size": 7566,
+      "desc": "Package for i686"
+    }
+]}
