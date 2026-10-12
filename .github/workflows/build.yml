@@ -1,0 +1,82 @@
+name: Build and Deploy XBPS Repository
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/void-linux/void-glibc-full:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Wajib false agar tidak konflik permission saat push dari dalam container
+          persist-credentials: false 
+
+      - name: Update xbps dan install dependencies
+        env:
+          # Mencegah error permission chown saat xbps berjalan di dalam Docker container
+          XBPS_ALLOW_CHOWN: 1 
+        run: |
+          xbps-install -Syu xbps
+          xbps-install -y git bash coreutils
+
+      - name: Sign Packages
+        env:
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          XBPS_ALLOW_CHOWN: 1
+        run: |
+          bash .github/workflows/signature.sh
+
+      - name: Generate Index Files
+        run: |
+          bash .github/workflows/autogen-index.sh
+
+      - name: Generate Packages JSON
+        run: |
+          bash .github/workflows/autogen-json.sh
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add -A
+          
+          # Cek apakah ada perubahan sebelum commit
+          if git diff --staged --quiet; then
+            echo "Tidak ada perubahan yang perlu di-commit."
+          else
+            git commit -m "Auto: Sign packages and generate index [skip ci]"
+            # Set remote URL menggunakan GITHUB_TOKEN untuk autentikasi push
+            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git push
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
