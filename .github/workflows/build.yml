@@ -23,7 +23,7 @@ jobs:
           # Wajib false agar tidak konflik permission saat push dari dalam container
           persist-credentials: false 
 
-      - name: Update xbps dan install dependencies
+      - name: Update xbps & install dependencies
         env:
           # Mencegah error permission chown saat xbps berjalan di dalam Docker container
           XBPS_ALLOW_CHOWN: 1 

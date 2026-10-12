@@ -1,8 +1,7 @@
 #!/bin/bash
 set -e
 
-# Decode private key dari GitHub Secrets
-echo "$SIGN_KEY" | base64 -d > private.pem
+echo "$SIGN_KEY" > private.pem
 chmod 600 private.pem
 
 # Sign semua file .xbps di setiap arsitektur
@@ -14,7 +13,7 @@ for arch in x86_64 i686 aarch64 armv6l armv7l; do
         if [ ! -f "$arch/repodata" ]; then
             xbps-rindex --privkey private.pem \
                 --sign \
-                --signedby "T4n OS Repository <admin@t4n.org>" \
+                --signedby "T4n OS Repository <t4nos.linux@gmail.com>" \
                 "$arch"
         fi
         
