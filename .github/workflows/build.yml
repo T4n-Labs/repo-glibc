@@ -20,13 +20,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Wajib false agar tidak konflik permission saat push dari dalam container
-          persist-credentials: false 
+          persist-credentials: true  # ← UBAH: true agar credentials tersimpan
 
-      - name: Update xbps & install dependencies
+      - name: Update xbps dan install dependencies
         env:
-          # Mencegah error permission chown saat xbps berjalan di dalam Docker container
-          XBPS_ALLOW_CHOWN: 1 
+          XBPS_ALLOW_CHOWN: 1
         run: |
           xbps-install -Syu xbps
           xbps-install -y git bash coreutils
@@ -47,19 +45,24 @@ jobs:
           bash .github/workflows/autogen-json.sh
 
       - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          
           git add -A
           
-          # Cek apakah ada perubahan sebelum commit
+          # Cek apakah ada perubahan
           if git diff --staged --quiet; then
-            echo "Tidak ada perubahan yang perlu di-commit."
+            echo "✓ Tidak ada perubahan yang perlu di-commit"
           else
             git commit -m "Auto: Sign packages and generate index [skip ci]"
-            # Set remote URL menggunakan GITHUB_TOKEN untuk autentikasi push
-            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-            git push
+            # Push menggunakan token
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main || \
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:master || \
+            echo "⚠️ Push gagal - mungkin branch tidak ada"
           fi
 
       - name: Setup Pages
