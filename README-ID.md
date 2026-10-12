@@ -17,7 +17,7 @@ Ikuti 3 langkah mudah ini untuk mulai menggunakan repositori T4n OS:
 **1. Tambahkan konfigurasi repositori**  
 Sesuaikan dengan arsitektur sistem Anda (contoh di bawah untuk `x86_64`):
 ```bash
-echo 'repository=https://t4n-labs.github.io/repo-glibc/x86_64/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/x86_64' | sudo tee /etc/xbps.d/10-glibc.conf
 ```
 
 **2. Sinkronisasi database paket**  
@@ -35,7 +35,7 @@ sudo xbps-install package_name
 
 **^ Auto Install**
 ```sh
-curl -L https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
+curl -sL https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
 ```
 
 ## Dokumentasi Lengkap

@@ -19,7 +19,7 @@ Anda dapat menambahkan repositori menggunakan penginstal otomatis kami (Direkome
 Cukup jalankan perintah satu baris ini di terminal Anda. Perintah ini akan secara otomatis mendeteksi arsitektur Anda, menambahkan repositori, dan mengimpor kunci tanda tangan publik:
 
 ```bash
-curl -L https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
+curl -sL https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
 ```
 
 ### Opsi B: Pengaturan Manual
@@ -33,13 +33,13 @@ Pilih perintah yang sesuai dengan arsitektur sistem Anda:
 
 ```bash
 # Untuk x86_64 (PC 64-bit Standar)
-echo 'repository=https://t4n-labs.github.io/repo-glibc/x86_64/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/x86_64' | sudo tee /etc/xbps.d/10-glibc.conf
 
 # Untuk i686 (PC 32-bit)
-echo 'repository=https://t4n-labs.github.io/repo-glibc/i686/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/i686' | sudo tee /etc/xbps.d/10-glibc.conf
 
 # Untuk aarch64 (ARM 64-bit)
-echo 'repository=https://t4n-labs.github.io/repo-glibc/aarch64/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/aarch64' | sudo tee /etc/xbps.d/10-glibc.conf
 ```
 *(Catatan: Kami juga memelihara `repo-musl`, `repo-server`, dan `repo-security`. Sesuaikan URL dan nama file `.conf` jika Anda menggunakan repositori tersebut.)*
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 # ============================================================
 # T4n OS — Repository Auto-Installer
-# Usage: curl -L https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
+# Usage: curl -sL https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
 # ============================================================
 
 set -e
@@ -29,7 +29,7 @@ echo_error() { echo "${RED}[ERROR]${NC} $1"; }
 # 1. Cek Hak Akses Root
 if [ "$(id -u)" -ne 0 ]; then
     echo_error "Script ini harus dijalankan sebagai root!"
-    echo "Gunakan perintah: curl -L ${REPO_URL}install.sh | sudo sh"
+    echo "Gunakan perintah: curl -sL ${REPO_URL}install.sh | sudo sh"
     exit 1
 fi
 
@@ -58,7 +58,7 @@ mkdir -p /etc/xbps.d
 
 # 4. Tulis File Konfigurasi Repository
 echo_info "[2/4] Menambahkan repository ke sistem..."
-echo "repository=${REPO_URL}${ARCH}/" > "$CONF_FILE"
+echo "repository=${REPO_URL}${ARCH}" > "$CONF_FILE"
 echo_success "Konfigurasi disimpan di $CONF_FILE"
 
 # 5. Unduh Kunci Publik (Opsional tapi sangat disarankan)

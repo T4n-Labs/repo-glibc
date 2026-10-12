@@ -20,7 +20,7 @@ You can add the repository using our automated installer (Recommended) or manual
 Simply run this one-line command in your terminal. It will automatically detect your architecture, add the repository, and import the public signing key:
 
 ```bash
-curl -L https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
+curl -sL https://t4n-labs.github.io/repo-glibc/install.sh | sudo sh
 ```
 
 ### Option B: Manual Setup
@@ -34,13 +34,13 @@ Choose the command that matches your system's architecture:
 
 ```bash
 # For x86_64 (Standard 64-bit PC)
-echo 'repository=https://t4n-labs.github.io/repo-glibc/x86_64/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/x86_64' | sudo tee /etc/xbps.d/10-glibc.conf
 
 # For i686 (32-bit PC)
-echo 'repository=https://t4n-labs.github.io/repo-glibc/i686/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/i686' | sudo tee /etc/xbps.d/10-glibc.conf
 
 # For aarch64 (64-bit ARM)
-echo 'repository=https://t4n-labs.github.io/repo-glibc/aarch64/' | sudo tee /etc/xbps.d/10-glibc.conf
+echo 'repository=https://t4n-labs.github.io/repo-glibc/aarch64' | sudo tee /etc/xbps.d/10-glibc.conf
 ```
 *(Note: We also maintain `repo-musl`, `repo-server`, and `repo-security`. Adjust the URL and `.conf` filename accordingly if you are using those.)*
 
