@@ -1,54 +1,61 @@
 #!/bin/bash
-set -e
+# packages.json per arsitektur. Selalu dibuat ulang.
+#   name, version, arch, filename, size  <- nama + ukuran file .xbps
+#   desc                                 <- short_desc di pkg-recipe/<name>/template
+# "version" tanpa revisi ("1.0"); revisi tetap ada di "filename" ("zvc-1.0_1.x86_64.xbps").
+set -euo pipefail
 
-# Generate packages.json untuk setiap arsitektur
+RECIPES="pkg-recipe"
+
+# escape untuk string JSON
+json_esc() {
+    printf '%s' "$1" | tr '\t\r\n' '   ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'
+}
+
+# short_desc dari template (kosong jika tidak ada, mis. subpackage)
+desc_of() {
+    local t="$RECIPES/$1/template"
+    [ -f "$t" ] || return 0
+    (
+        set +eu
+        unset short_desc
+        . "$t" >/dev/null 2>&1
+        printf '%s' "${short_desc:-}"
+    )
+}
+
 for arch in x86_64 i686 aarch64 armv6l armv7l; do
-    if [ -d "$arch" ]; then
-        echo "Generating packages.json for $arch..."
-        
-        # Mulai JSON array
-        echo '{"packages": [' > "$arch/packages.json"
-        
-        first=true
-        for pkg in "$arch"/*.xbps; do
-            if [ -f "$pkg" ]; then
-                filename=$(basename "$pkg")
-                filesize=$(stat -f%z "$pkg" 2>/dev/null || stat -c%s "$pkg" 2>/dev/null || echo "0")
-                
-                # Parse nama paket: name-version.arch.xbps
-                # Contoh: zvc-1.0_1.x86_64.xbps
-                basename="${filename%.xbps}"  # zvc-1.0_1.x86_64
-                pkgarch="${basename##*.}"      # x86_64
-                rest="${basename%.*}"          # zvc-1.0_1
-                version="${rest##*-}"          # 1.0_1
-                name="${rest%-*}"              # zvc
-                
-                # Tambahkan koma untuk entri sebelumnya
-                if [ "$first" = true ]; then
-                    first=false
-                else
-                    echo "," >> "$arch/packages.json"
-                fi
-                
-                # Tulis entri JSON
-                cat >> "$arch/packages.json" << PKGJSON
+    [ -d "$arch" ] || continue
+    echo "Generating packages.json for $arch..."
+
+    out="$arch/packages.json"
+    first=true
     {
-      "name": "$name",
-      "version": "$version",
-      "arch": "$arch",
-      "filename": "$filename",
-      "size": $filesize,
-      "desc": "Package for $arch"
-    }
-PKGJSON
-            fi
+        printf '{\n  "packages": ['
+        for pkg in "$arch"/*.xbps; do
+            [ -f "$pkg" ] || continue
+
+            filename=$(basename "$pkg")
+            size=$(wc -c < "$pkg" | tr -d ' ')
+
+            # zvc-1.0_1.x86_64.xbps
+            base="${filename%.xbps}"      # zvc-1.0_1.x86_64
+            pkgarch="${base##*.}"         # x86_64
+            rest="${base%.*}"             # zvc-1.0_1
+            verrev="${rest##*-}"          # 1.0_1
+            name="${rest%-*}"             # zvc
+            version="${verrev%%_*}"       # 1.0
+            desc=$(desc_of "$name")
+
+            if [ "$first" = true ]; then first=false; else printf ','; fi
+            printf '\n    {\n      "name": "%s",\n      "version": "%s",\n      "arch": "%s",\n      "filename": "%s",\n      "size": %s,\n      "desc": "%s"\n    }' \
+                "$(json_esc "$name")" "$(json_esc "$version")" "$(json_esc "$pkgarch")" \
+                "$(json_esc "$filename")" "$size" "$(json_esc "$desc")"
         done
-        
-        # Tutup JSON
-        echo ']}' >> "$arch/packages.json"
-        
-        echo "  ✓ Created $arch/packages.json with $(grep -c '"name"' "$arch/packages.json") packages"
-    fi
+        printf '\n  ]\n}\n'
+    } > "$out"
+
+    echo "  ✓ $out ($(grep -c '"name"' "$out") paket)"
 done
 
 echo "✓ All packages.json generated"

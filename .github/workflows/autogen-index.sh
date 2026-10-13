@@ -54,10 +54,11 @@ for arch in x86_64 i686 aarch64 armv6l armv7l; do
     <ul>
 ARCHINDEX
 
-        # List semua file .xbps
-        for file in "$arch"/*.xbps; do
+        # List semua file (.xbps, .sig2, repodata, packages.json), kecuali index.html itu sendiri
+        for file in "$arch"/*; do
             if [ -f "$file" ]; then
                 filename=$(basename "$file")
+                [ "$filename" = "index.html" ] && continue
                 echo "        <li><a href=\"${filename}\">${filename}</a></li>" >> "$arch/index.html"
             fi
         done
