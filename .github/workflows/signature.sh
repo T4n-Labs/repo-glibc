@@ -3,7 +3,7 @@
 # Urutan WAJIB: xbps-rindex -a  ->  --sign  ->  --sign-pkg
 #   -a        membuat <arch>-repodata (tanpa ini, --sign gagal:
 #             "cannot read repository data: No such file or directory")
-#   --sign    menandatangani repodata (membuat <arch>-repodata.sig2)
+#   --sign    menanam kunci publik + signature-by ke dalam <arch>-repodata (tidak ada file baru)
 #   --sign-pkg menandatangani tiap paket (membuat <paket>.xbps.sig2)
 # Tidak ada "|| true": kegagalan sebenarnya harus menggagalkan job.
 set -euo pipefail
@@ -35,15 +35,20 @@ for arch in x86_64 i686 aarch64 armv6l armv7l; do
     echo "  [1/3] index"
     xbps-rindex -a "${pkgs[@]}"
 
-    echo "  [2/3] tanda tangan repodata"
+    echo "  [2/3] inisialisasi repo bertanda tangan (kunci publik masuk ke repodata)"
     xbps-rindex --privkey "$KEY" --sign --signedby "$SIGNEDBY" "$PWD/$arch"
 
     echo "  [3/3] tanda tangan paket"
     xbps-rindex --privkey "$KEY" --sign-pkg "${pkgs[@]}"
 
-    # pastikan hasilnya ada
-    [ -f "$arch/$arch-repodata" ]      || { echo "ERROR: $arch-repodata tidak terbentuk"; exit 1; }
-    [ -f "$arch/$arch-repodata.sig2" ] || { echo "ERROR: $arch-repodata.sig2 tidak terbentuk"; exit 1; }
+    # pastikan hasilnya ada.
+    # CATATAN: --sign TIDAK membuat file <arch>-repodata.sig2. Ia menanam kunci publik dan
+    # "signature-by" ke dalam <arch>-repodata itu sendiri (lihat xbps bin/xbps-rindex/sign.c).
+    # Yang membuat file .sig2 hanya --sign-pkg: satu <paket>.xbps.sig2 per paket.
+    [ -f "$arch/$arch-repodata" ] || { echo "ERROR: $arch-repodata tidak terbentuk"; exit 1; }
+    for p in "${pkgs[@]}"; do
+        [ -f "$p.sig2" ] || { echo "ERROR: $(basename "$p").sig2 tidak terbentuk"; exit 1; }
+    done
 done
 
 echo "✓ Signing completed"
