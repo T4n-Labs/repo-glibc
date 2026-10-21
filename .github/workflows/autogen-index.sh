@@ -29,6 +29,7 @@ done
 cat >> index.html << 'INDEX'
     </ul>
     <p>Source: <a href="https://github.com/T4n-Labs/repo-glibc">GitHub</a></p>
+    <p>Secondary Source: <a href="https://gitlab.com/t4n-pkg">GitLab</a></p>
     <p>T4n Labs ◉ Gh0sT4n</p>
 </body>
 </html>
@@ -65,7 +66,8 @@ ARCHINDEX
 
         cat >> "$arch/index.html" << 'ARCHINDEX'
     </ul>
-    <p>Source: <a href="https://github.com/T4n-Labs/repo-glibc">GitHub</a></p>
+    <p>Primary Source: <a href="https://github.com/T4n-Labs/repo-glibc">GitHub</a></p>
+    <p>Secondary Source: <a href="https://gitlab.com/t4n-pkg">GitLab</a></p>
     <p>T4n Labs ◉ Gh0sT4n</p>
 </body>
 </html>
