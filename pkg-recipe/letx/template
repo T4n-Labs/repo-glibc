@@ -1,0 +1,17 @@
+# Template file for 'letx'
+pkgname=letx
+version=1.0.0
+revision=1
+build_style=python3-pep517
+hostmakedepends="python3-setuptools python3-wheel"
+depends="python3"
+short_desc="CLI Tools - VUR Helper"
+maintainer="Gh0sT4n <darskevoid@gmail.com>"
+license="GPL-3.0"
+homepage="https://github.com/gh0st4n/Let-X"
+distfiles="https://github.com/gh0st4n/Let-X/archive/refs/tags/v${version}.tar.gz"
+checksum=de2f4a5709e83a24834e4374884fae83463b6cfd5a5094b11699e2335c701070
+
+post_install() {
+	vlicense LICENSE
+}
